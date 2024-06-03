@@ -29,14 +29,34 @@ public class DAOFile {
     }
 
     public void saveToDatabase(String content, String fileName) {
-        String sql = "INSERT INTO Dados (dados, arquivo) VALUES (?, ?)";
+        String checkSql = "SELECT COUNT(*) FROM Dados WHERE arquivo = ?";
+        String updateSql = "UPDATE Dados SET dados = ? WHERE arquivo = ?";
+        String insertSql = "INSERT INTO Dados (dados, arquivo) VALUES (?, ?)";
         Conexao conexaoDB = Conexao.getInstancia();
         Connection conn = conexaoDB.conectar();
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, content);
-            pstmt.setString(2, fileName);
-            pstmt.executeUpdate();
+        try {
+            // Check if the file already exists
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setString(1, fileName);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        // Update the existing record
+                        try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                            updateStmt.setString(1, content);
+                            updateStmt.setString(2, fileName);
+                            updateStmt.executeUpdate();
+                        }
+                    } else {
+                        // Insert a new record
+                        try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                            insertStmt.setString(1, content);
+                            insertStmt.setString(2, fileName);
+                            insertStmt.executeUpdate();
+                        }
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -61,7 +81,7 @@ public class DAOFile {
 
         return files;
     }
-    
+
     public String getContentFromFile(String fileName) {
         String content = null;
         String sql = "SELECT dados FROM Dados WHERE arquivo = ?";
@@ -81,5 +101,4 @@ public class DAOFile {
 
         return content;
     }
-
 }
