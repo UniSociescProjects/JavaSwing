@@ -2,120 +2,158 @@ package uni;
 
 import java.awt.*;
 import javax.swing.*;
-
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.table.DefaultTableModel;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
-import net.miginfocom.swing.MigLayout;
-
-import javax.swing.DefaultListModel;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.SwingUtilities;
-import javax.swing.JButton;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.table.DefaultTableModel;
-
+import java.util.Arrays;
 import controle.DAOFile;
-
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import modelos.BubbleSort;
 
 public class TelaInicial extends JFrame {
-	private DefaultListModel<String> listModel;
-	private DefaultTableModel tableModel;
+    private DefaultListModel<String> listModel;
+    private DefaultTableModel tableModel;
     private JList<String> fileList;
-	private JTable dataTable;
-	private JComboBox<String> fileComboBox;
+    private JTable dataTable;
+    private JComboBox<String> fileComboBox;
+    private JComboBox<String> searchSortComboBox;
+    private JComboBox<String> optionsComboBox;
+    private static DAOFile daoFile = new DAOFile();
+    private int[] dados;
 
-	public TelaInicial() {
-		setTitle("Java Swing");
-		setVisible(true);
-		setSize(800, 400);
-		
-		JPanel panel = new JPanel();
-		GroupLayout groupLayout = new GroupLayout(getContentPane());
-		groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(Alignment.LEADING).addComponent(panel,
-				GroupLayout.DEFAULT_SIZE, 747, Short.MAX_VALUE));
-		groupLayout.setVerticalGroup(
-				groupLayout.createParallelGroup(Alignment.LEADING).addGroup(groupLayout.createSequentialGroup()
-						.addComponent(panel, GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE).addGap(0)));
+    public TelaInicial() {
+        setTitle("Java Swing");
+        setSize(800, 450);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        
+        JPanel panel = new JPanel();
+        GroupLayout groupLayout = new GroupLayout(getContentPane());
+        groupLayout.setHorizontalGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(panel,
+                GroupLayout.DEFAULT_SIZE, 747, Short.MAX_VALUE));
+        groupLayout.setVerticalGroup(
+                groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(groupLayout.createSequentialGroup()
+                        .addComponent(panel, GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE).addGap(0)));
 
-		JScrollPane scrollPane = new JScrollPane();
+        JScrollPane scrollPane = new JScrollPane();
 
-		JButton btnArquivo = new JButton("Inserir Arquivo");
-		btnArquivo.addActionListener(e -> carregarArquivo());
-		
-		listModel = new DefaultListModel<>();
-		fileList = new JList<>(listModel);
-		scrollPane.add(new JScrollPane(fileList));
+        JButton btnArquivo = new JButton("Inserir Arquivo");
+        btnArquivo.addActionListener(e -> carregarArquivo());
 
-		fileComboBox = new JComboBox<>();
-		scrollPane.add(fileComboBox);
-		
-		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(
-			gl_panel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addGap(26)
-					.addComponent(btnArquivo)
-					.addGap(18)
-					.addComponent(fileComboBox, 0, 137, Short.MAX_VALUE)
-					.addGap(28)
-					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 425, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap())
-		);
-		gl_panel.setVerticalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel.createSequentialGroup()
-							.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-								.addComponent(btnArquivo, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-							.addGap(317))
-						.addComponent(scrollPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 340, Short.MAX_VALUE))
-					.addContainerGap())
-		);
-		
-		String[] columnNames = {"Dados"};
-        tableModel = new DefaultTableModel(columnNames, 0);
-        dataTable = new JTable(tableModel);
-		scrollPane.setViewportView(dataTable);
-		panel.setLayout(gl_panel);
-		getContentPane().setLayout(groupLayout);
-		
-		atualizarArquivosNoComboBox();
-		
-		fileComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String selectedFile = (String) fileComboBox.getSelectedItem();
+        listModel = new DefaultListModel<>();
+        fileList = new JList<>(listModel);
+        JScrollPane fileListScrollPane = new JScrollPane(fileList);
+
+        fileComboBox = new JComboBox<>();
+        fileComboBox.addActionListener(e -> {
+            String selectedFile = (String) fileComboBox.getSelectedItem();
+            if (selectedFile != null) {
                 exibirInformacoesDoArquivo(selectedFile);
             }
         });
 
-	}
-	
-	private void carregarArquivo() {
+        searchSortComboBox = new JComboBox<>(new String[]{"Pesquisa", "Ordenação"});
+        searchSortComboBox.addActionListener(e -> atualizarOptionsComboBox());
+
+        optionsComboBox = new JComboBox<>();
+        optionsComboBox.addActionListener(e -> {
+            if (searchSortComboBox.getSelectedItem().equals("Ordenação")) {
+                System.out.println("Selecionado: Ordenação");
+                String selectedSortMethod = (String) optionsComboBox.getSelectedItem();
+                System.out.println("Método de Ordenação: " + selectedSortMethod);
+                String selectedFile = (String) fileComboBox.getSelectedItem();
+                if (selectedFile != null && selectedSortMethod != null) {
+                    if (selectedSortMethod.equals("BubbleSort")) {
+                        System.out.println("Executando BubbleSort");
+                        ordenarComBubbleSort(selectedFile);
+                    }
+                }
+            }
+        });
+
+        JLabel lblNewLabel = new JLabel("Método de Pesquisa/Ordenação:");
+        
+        JLabel lblSelecionarPesquisaordenao = new JLabel("Selecionar Pesquisa/Ordenação:");
+        
+        JLabel lblArquivosSalvos = new JLabel("Arquivos Salvos:");
+
+        GroupLayout gl_panel = new GroupLayout(panel);
+        gl_panel.setHorizontalGroup(
+            gl_panel.createParallelGroup(Alignment.TRAILING)
+                .addGroup(gl_panel.createSequentialGroup()
+                    .addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+                        .addGroup(gl_panel.createSequentialGroup()
+                            .addGap(85)
+                            .addComponent(btnArquivo))
+                        .addGroup(gl_panel.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(fileComboBox, 0, 150, Short.MAX_VALUE))
+                        .addGroup(gl_panel.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(optionsComboBox, 0, 150, Short.MAX_VALUE))
+                        .addGroup(gl_panel.createSequentialGroup()
+                            .addGap(20)
+                            .addComponent(lblNewLabel))
+                        .addGroup(gl_panel.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(searchSortComboBox, 0, 150, Short.MAX_VALUE))
+                        .addGroup(gl_panel.createSequentialGroup()
+                            .addGap(22)
+                            .addComponent(lblSelecionarPesquisaordenao, GroupLayout.PREFERRED_SIZE, 157, GroupLayout.PREFERRED_SIZE))
+                        .addGroup(gl_panel.createSequentialGroup()
+                            .addGap(20)
+                            .addComponent(lblArquivosSalvos, GroupLayout.PREFERRED_SIZE, 157, GroupLayout.PREFERRED_SIZE)))
+                    .addPreferredGap(ComponentPlacement.RELATED)
+                    .addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 425, GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap())
+        );
+        gl_panel.setVerticalGroup(
+            gl_panel.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panel.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
+                        .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE)
+                        .addGroup(gl_panel.createSequentialGroup()
+                            .addComponent(btnArquivo)
+                            .addGap(9)
+                            .addComponent(lblSelecionarPesquisaordenao)
+                            .addGap(7)
+                            .addComponent(searchSortComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                            .addGap(5)
+                            .addComponent(lblNewLabel)
+                            .addGap(8)
+                            .addComponent(optionsComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                            .addGap(28)
+                            .addComponent(lblArquivosSalvos)
+                            .addGap(8)
+                            .addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                            .addGap(160)))
+                    .addContainerGap())
+        );
+
+        String[] columnNames = {"Dados"};
+        tableModel = new DefaultTableModel(columnNames, 0);
+        dataTable = new JTable(tableModel);
+        scrollPane.setViewportView(dataTable);
+
+        panel.setLayout(gl_panel);
+        getContentPane().setLayout(groupLayout);
+
+        setVisible(true);
+        iniciarSelect();
+        atualizarOptionsComboBox();
+    }
+
+    private void carregarArquivo() {
         JFileChooser fileChooser = new JFileChooser();
         int returnValue = fileChooser.showOpenDialog(this);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
+            String fileName = file.getName();
             salvarArquivoNoBanco(file);
+            exibirInformacoesDoArquivo(fileName);
         }
     }
 
@@ -124,7 +162,11 @@ public class TelaInicial extends JFrame {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                content.append(line).append("\n");
+                if (isLong(line.trim())) {
+                    content.append(line).append("\n");
+                } else {
+                    System.out.println("Ignorando linha inválida: " + line);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -132,54 +174,103 @@ public class TelaInicial extends JFrame {
             return;
         }
 
-        // Salva o conteúdo do arquivo no banco de dados
-        DAOFile daoFile = new DAOFile();
         daoFile.saveToDatabase(content.toString(), file.getName());
+        atualizarComboBoxELista();
+        tableModel.setRowCount(0);
+        
+        long[] longDados = Arrays.stream(content.toString().split("\n"))
+                                 .mapToLong(Long::parseLong)
+                                 .toArray();
 
-        // Atualiza a lista de dados exibida na interface gráfica
-        listModel.clear();
-        listModel.addElement(file.getName());
-
-        // Atualiza o JComboBox com os arquivos do banco de dados
-        atualizarArquivosNoComboBox();
-
-        // Atualiza a tabela com os dados do arquivo
-        tableModel.setRowCount(0); // Limpa a tabela
-        String[] lines = content.toString().split("\n");
-        for (String line : lines) {
-            tableModel.addRow(new Object[]{line}); // Adiciona cada linha como uma nova linha na tabela
+        for (long dado : longDados) {
+            tableModel.addRow(new Object[]{dado});
+        }
+    }
+    
+    private boolean isLong(String str) {
+        try {
+            Long.parseLong(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
-    private void atualizarArquivosNoComboBox() {
-        DAOFile daoFile = new DAOFile();
+    private void ordenarComBubbleSort(String fileName) {
+        String content = daoFile.getContentFromFile(fileName);
+        if (content == null || content.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "O conteúdo do arquivo está vazio ou não foi encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String[] lines = content.split("\n");
+        long[] data = new long[lines.length];
+        for (int i = 0; i < lines.length; i++) {
+            data[i] = parseLongWithoutLeadingZeros(lines[i].trim());
+        }
+
+        BubbleSort.sort(data);
+        System.out.println("Dados após a ordenação: " + Arrays.toString(data));
+
+        StringBuilder sortedContent = new StringBuilder();
+        for (long num : data) {
+            sortedContent.append(num).append("\n");
+        }
+
+        daoFile.saveToDatabase(sortedContent.toString(), fileName);
+        
+        exibirInformacoesDoArquivo(fileName);
+    }
+
+
+    private long parseLongWithoutLeadingZeros(String str) {
+        return Long.parseLong(str.replaceFirst("^0+(?!$)", ""));
+    }
+
+
+
+    private void atualizarComboBoxELista() {
+        listModel.clear();
         fileComboBox.removeAllItems();
+
         for (String fileItem : daoFile.getFilesFromDatabase()) {
+            listModel.addElement(fileItem);
             fileComboBox.addItem(fileItem);
         }
     }
 
-    private void exibirInformacoesDoArquivo(String fileName) {
-        DAOFile daoFile = new DAOFile();
-        String content = daoFile.getContentFromFile(fileName);
-
-        if (content != null) {
-            // Atualiza a tabela com os dados do arquivo selecionado
-            tableModel.setRowCount(0); // Limpa a tabela
-            String[] lines = content.split("\n");
-            for (String line : lines) {
-                tableModel.addRow(new Object[]{line}); // Adiciona cada linha como uma nova linha na tabela
-            }
-        } else {
-            // Adicione um tratamento de erro apropriado, como uma mensagem para o usuário
-            JOptionPane.showMessageDialog(this, "Erro ao carregar o conteúdo do arquivo.", "Erro", JOptionPane.ERROR_MESSAGE);
+    private void iniciarSelect() {
+        for (String fileItem : daoFile.getFilesFromDatabase()) {
+        	fileComboBox.addItem(fileItem);
         }
     }
 
+    private void atualizarOptionsComboBox() {
+        optionsComboBox.removeAllItems();
+        if (searchSortComboBox.getSelectedItem().equals("Pesquisa")) {
+            optionsComboBox.addItem("Pesquisa Linear");
+            optionsComboBox.addItem("Pesquisa Recursiva");
+        } else {
+            optionsComboBox.addItem("InsertionSort");
+            optionsComboBox.addItem("QuickSort");
+            optionsComboBox.addItem("BubbleSort");
+        }
+    }
+
+    private void exibirInformacoesDoArquivo(String fileName) {
+        String content = daoFile.getContentFromFile(fileName);
+
+        tableModel.setRowCount(0);
+        String[] lines = content.split("\n");
+        for (String line : lines) {
+            tableModel.addRow(new Object[]{line});
+        }
+
+        listModel.clear();
+        listModel.addElement(fileName);
+    }
 
     public static void main(String[] args) {
-        // Garante que a interface gráfica seja construída na thread de despacho de eventos Swing
         SwingUtilities.invokeLater(TelaInicial::new);
     }
 }
-
