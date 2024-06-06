@@ -12,6 +12,7 @@ import controle.DAOFile;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import modelos.BubbleSort;
+import modelos.QuickSort;
 
 public class TelaInicial extends JFrame {
     private DefaultListModel<String> listModel;
@@ -68,6 +69,9 @@ public class TelaInicial extends JFrame {
                     if (selectedSortMethod.equals("BubbleSort")) {
                         System.out.println("Executando BubbleSort");
                         ordenarComBubbleSort(selectedFile);
+                    } else if (selectedSortMethod.equals("QuickSort")){
+                    	System.out.println("Executando QuickSort");
+                        ordenarComQuickSort(selectedFile);	
                     }
                 }
             }
@@ -210,6 +214,32 @@ public class TelaInicial extends JFrame {
         }
 
         BubbleSort.sort(data);
+        System.out.println("Dados após a ordenação: " + Arrays.toString(data));
+
+        StringBuilder sortedContent = new StringBuilder();
+        for (long num : data) {
+            sortedContent.append(num).append("\n");
+        }
+
+        daoFile.saveToDatabase(sortedContent.toString(), fileName);
+        
+        exibirInformacoesDoArquivo(fileName);
+    }
+    
+    private void ordenarComQuickSort(String fileName) {
+        String content = daoFile.getContentFromFile(fileName);
+        if (content == null || content.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "O conteúdo do arquivo está vazio ou não foi encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String[] lines = content.split("\n");
+        long[] data = new long[lines.length];
+        for (int i = 0; i < lines.length; i++) {
+            data[i] = parseLongWithoutLeadingZeros(lines[i].trim());
+        }
+
+        QuickSort.quicksort(data, 0, (data.length-1));
         System.out.println("Dados após a ordenação: " + Arrays.toString(data));
 
         StringBuilder sortedContent = new StringBuilder();
