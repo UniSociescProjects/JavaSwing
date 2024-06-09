@@ -7,15 +7,3 @@ CREATE TABLE IF NOT EXISTS Dados (
     dados LONGTEXT,
     arquivo VARCHAR(255) NOT NULL
 );
-
-CREATE TABLE IF NOT EXISTS Pesquisa (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tipo_pesquisa VARCHAR(50),
-    chave INTEGER
-);
-
-CREATE TABLE IF NOT EXISTS Ordenacao (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    tipo_ordenacao VARCHAR(50),
-    elemento INTEGER
-);
