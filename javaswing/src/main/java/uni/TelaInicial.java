@@ -12,6 +12,7 @@ import controle.DAOFile;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import modelos.BubbleSort;
+import modelos.PesquisaBinaria;
 import modelos.QuickSort;
 
 public class TelaInicial extends JFrame {
@@ -24,6 +25,7 @@ public class TelaInicial extends JFrame {
     private JComboBox<String> optionsComboBox;
     private static DAOFile daoFile = new DAOFile();
     private int[] dados;
+    private JTextField textField;
 
     public TelaInicial() {
         setTitle("Java Swing");
@@ -75,6 +77,23 @@ public class TelaInicial extends JFrame {
                     }
                 }
             }
+            if (searchSortComboBox.getSelectedItem().equals("Pesquisa")) {
+                System.out.println("Selecionado: Pesquisa");
+                String selectedSortMethod = (String) optionsComboBox.getSelectedItem();
+                System.out.println("Método de Pesquisa: " + selectedSortMethod);
+                String selectedFile = (String) fileComboBox.getSelectedItem();
+
+                if (selectedSortMethod.equals("Pesquisa Binária")){
+                    System.out.println("Executando Pesquisa Binária");
+                    String value = textField.getText();
+                    if (!value.isEmpty()) {
+                        pesquisarComPesquisaBinaria(selectedFile, Long.parseLong(value));
+                    } else {
+                        System.out.println("Nenhum número Digitado");
+                    }
+                }
+            }
+                
         });
 
         JLabel lblNewLabel = new JLabel("Método de Pesquisa/Ordenação:");
@@ -82,59 +101,68 @@ public class TelaInicial extends JFrame {
         JLabel lblSelecionarPesquisaordenao = new JLabel("Selecionar Pesquisa/Ordenação:");
         
         JLabel lblArquivosSalvos = new JLabel("Arquivos Salvos:");
+        
+        textField = new JTextField();
+        textField.setColumns(10);
 
         GroupLayout gl_panel = new GroupLayout(panel);
         gl_panel.setHorizontalGroup(
-            gl_panel.createParallelGroup(Alignment.TRAILING)
-                .addGroup(gl_panel.createSequentialGroup()
-                    .addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-                        .addGroup(gl_panel.createSequentialGroup()
-                            .addGap(85)
-                            .addComponent(btnArquivo))
-                        .addGroup(gl_panel.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(fileComboBox, 0, 150, Short.MAX_VALUE))
-                        .addGroup(gl_panel.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(optionsComboBox, 0, 150, Short.MAX_VALUE))
-                        .addGroup(gl_panel.createSequentialGroup()
-                            .addGap(20)
-                            .addComponent(lblNewLabel))
-                        .addGroup(gl_panel.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(searchSortComboBox, 0, 150, Short.MAX_VALUE))
-                        .addGroup(gl_panel.createSequentialGroup()
-                            .addGap(22)
-                            .addComponent(lblSelecionarPesquisaordenao, GroupLayout.PREFERRED_SIZE, 157, GroupLayout.PREFERRED_SIZE))
-                        .addGroup(gl_panel.createSequentialGroup()
-                            .addGap(20)
-                            .addComponent(lblArquivosSalvos, GroupLayout.PREFERRED_SIZE, 157, GroupLayout.PREFERRED_SIZE)))
-                    .addPreferredGap(ComponentPlacement.RELATED)
-                    .addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 425, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap())
+        	gl_panel.createParallelGroup(Alignment.TRAILING)
+        		.addGroup(gl_panel.createSequentialGroup()
+        			.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+        				.addGroup(gl_panel.createSequentialGroup()
+        					.addGap(85)
+        					.addComponent(btnArquivo))
+        				.addGroup(gl_panel.createSequentialGroup()
+        					.addContainerGap()
+        					.addComponent(fileComboBox, 0, 335, Short.MAX_VALUE))
+        				.addGroup(gl_panel.createSequentialGroup()
+        					.addContainerGap()
+        					.addComponent(optionsComboBox, 0, 335, Short.MAX_VALUE))
+        				.addGroup(gl_panel.createSequentialGroup()
+        					.addGap(20)
+        					.addComponent(lblNewLabel))
+        				.addGroup(gl_panel.createSequentialGroup()
+        					.addContainerGap()
+        					.addComponent(searchSortComboBox, 0, 335, Short.MAX_VALUE))
+        				.addGroup(gl_panel.createSequentialGroup()
+        					.addGap(22)
+        					.addComponent(lblSelecionarPesquisaordenao, GroupLayout.PREFERRED_SIZE, 157, GroupLayout.PREFERRED_SIZE))
+        				.addGroup(gl_panel.createSequentialGroup()
+        					.addContainerGap()
+        					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+        						.addGroup(gl_panel.createSequentialGroup()
+        							.addGap(10)
+        							.addComponent(lblArquivosSalvos, GroupLayout.PREFERRED_SIZE, 157, GroupLayout.PREFERRED_SIZE))
+        						.addComponent(textField, GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE))))
+        			.addPreferredGap(ComponentPlacement.RELATED)
+        			.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 425, GroupLayout.PREFERRED_SIZE)
+        			.addContainerGap())
         );
         gl_panel.setVerticalGroup(
-            gl_panel.createParallelGroup(Alignment.LEADING)
-                .addGroup(gl_panel.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-                        .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 351, Short.MAX_VALUE)
-                        .addGroup(gl_panel.createSequentialGroup()
-                            .addComponent(btnArquivo)
-                            .addGap(9)
-                            .addComponent(lblSelecionarPesquisaordenao)
-                            .addGap(7)
-                            .addComponent(searchSortComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                            .addGap(5)
-                            .addComponent(lblNewLabel)
-                            .addGap(8)
-                            .addComponent(optionsComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                            .addGap(28)
-                            .addComponent(lblArquivosSalvos)
-                            .addGap(8)
-                            .addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                            .addGap(160)))
-                    .addContainerGap())
+        	gl_panel.createParallelGroup(Alignment.LEADING)
+        		.addGroup(gl_panel.createSequentialGroup()
+        			.addContainerGap()
+        			.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
+        				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
+        				.addGroup(gl_panel.createSequentialGroup()
+        					.addComponent(btnArquivo)
+        					.addGap(9)
+        					.addComponent(lblSelecionarPesquisaordenao)
+        					.addGap(7)
+        					.addComponent(searchSortComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+        					.addGap(5)
+        					.addComponent(lblNewLabel)
+        					.addGap(8)
+        					.addComponent(optionsComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+        					.addGap(8)
+        					.addComponent(textField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+        					.addGap(8)
+        					.addComponent(lblArquivosSalvos)
+        					.addGap(1)
+        					.addComponent(fileComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+        					.addGap(160)))
+        			.addContainerGap())
         );
 
         String[] columnNames = {"Dados"};
@@ -226,6 +254,36 @@ public class TelaInicial extends JFrame {
         exibirInformacoesDoArquivo(fileName);
     }
     
+    private void pesquisarComPesquisaBinaria(String fileName, long value) {
+        String content = daoFile.getContentFromFile(fileName);
+        if (content == null || content.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "O conteúdo do arquivo está vazio ou não foi encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String[] lines = content.split("\n");
+        long[] data = new long[lines.length];
+        for (int i = 0; i < lines.length; i++) {
+            data[i] = parseLongWithoutLeadingZeros(lines[i].trim());
+        }
+
+        Arrays.sort(data);
+
+        long[] foundValues = PesquisarTodos(data, value);
+
+        System.out.println("Valores encontrados: " + Arrays.toString(foundValues));
+
+        StringBuilder sortedContent = new StringBuilder();
+        for (long num : foundValues) {
+            sortedContent.append(num).append("\n");
+        }
+
+        daoFile.saveToDatabase(sortedContent.toString(), fileName);
+
+        exibirInformacoesDoArquivo(fileName);
+    }
+
+    
     private void ordenarComQuickSort(String fileName) {
         String content = daoFile.getContentFromFile(fileName);
         if (content == null || content.isEmpty()) {
@@ -257,7 +315,31 @@ public class TelaInicial extends JFrame {
         return Long.parseLong(str.replaceFirst("^0+(?!$)", ""));
     }
 
+    private long[] PesquisarTodos(long[] array, long target) {
+        int index = PesquisaBinaria.binarySearch(array, target);
 
+        if (index == -1) {
+            return new long[0];
+        }
+
+        int left = index;
+        int right = index;
+
+        while (left > 0 && array[left - 1] == target) {
+            left--;
+        }
+
+        while (right < array.length - 1 && array[right + 1] == target) {
+            right++;
+        }
+
+        long[] result = new long[right - left + 1];
+        for (int i = left; i <= right; i++) {
+            result[i - left] = array[i];
+        }
+
+        return result;
+    }
 
     private void atualizarComboBoxELista() {
         listModel.clear();
@@ -278,8 +360,7 @@ public class TelaInicial extends JFrame {
     private void atualizarOptionsComboBox() {
         optionsComboBox.removeAllItems();
         if (searchSortComboBox.getSelectedItem().equals("Pesquisa")) {
-            optionsComboBox.addItem("Pesquisa Linear");
-            optionsComboBox.addItem("Pesquisa Recursiva");
+            optionsComboBox.addItem("Pesquisa Binária");
         } else {
             optionsComboBox.addItem("InsertionSort");
             optionsComboBox.addItem("QuickSort");
