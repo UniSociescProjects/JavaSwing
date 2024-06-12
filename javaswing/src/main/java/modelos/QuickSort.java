@@ -14,7 +14,7 @@ public class QuickSort extends Ordenacao {
 	
 	// METODO DE PARTICAO DO ARRAY
 	public static int particao(long[] array, int menor, int maior) {
-		int pivo = (int)array[maior]; // ESCOLHE O ULTIMO ELEMENTO COMO PIVO
+		long pivo = array[maior]; // ESCOLHE O ULTIMO ELEMENTO COMO PIVO
         int i = (menor - 1); // INDICE DO MENOR ELEMENTO
         
         for (int j = menor; j < maior; j++) {
@@ -22,14 +22,14 @@ public class QuickSort extends Ordenacao {
             if (array[j] <= pivo) {
                 i++;
                 // TROCAR array[i] E array[j]
-                int temp = (int)array[i];
+                long temp = array[i];
                 array[i] = array[j];
                 array[j] = temp;
             }
         }
         
         // TROCAR array[i+1] E array[maior] (OU O PIVO)
-        int temp = (int)array[i + 1];
+        long temp = array[i + 1];
         array[i + 1] = array[maior];
         array[maior] = temp;
         return i + 1;
