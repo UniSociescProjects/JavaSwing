@@ -14,6 +14,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import modelos.BubbleSort;
 import modelos.PesquisaBinaria;
 import modelos.QuickSort;
+import modelos.InsertionSort;
 
 public class TelaInicial extends JFrame {
     private DefaultListModel<String> listModel;
@@ -310,6 +311,31 @@ public class TelaInicial extends JFrame {
         exibirInformacoesDoArquivo(fileName);
     }
 
+    private void ordenarComInsertionSort(String fileName) {
+        String content = daoFile.getContentFromFile(fileName);
+        if (content == null || content.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "O conteúdo do arquivo está vazio ou não foi encontrado.", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String[] lines = content.split("\n");
+        long[] data = new long[lines.length];
+        for (int i = 0; i < lines.length; i++) {
+            data[i] = parseLongWithoutLeadingZeros(lines[i].trim());
+        }
+
+        InsertionSort.sort(data);
+        System.out.println("Dados após a ordenação: " + Arrays.toString(data));
+
+        StringBuilder sortedContent = new StringBuilder();
+        for (long num : data) {
+            sortedContent.append(num).append("\n");
+        }
+
+        daoFile.saveToDatabase(sortedContent.toString(), fileName);
+        
+        exibirInformacoesDoArquivo(fileName);
+    }
 
     private long parseLongWithoutLeadingZeros(String str) {
         return Long.parseLong(str.replaceFirst("^0+(?!$)", ""));
